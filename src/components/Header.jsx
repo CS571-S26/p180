@@ -1,35 +1,33 @@
-import { Navbar, Container, Nav, Form, FormControl, Button } from 'react-bootstrap'
+import { Container, Navbar } from 'react-bootstrap'
+import { Link, NavLink } from 'react-router-dom'
 
 export default function Header() {
   return (
-    <Navbar bg="light" expand="lg" className="shadow-sm">
+    <Navbar expand="lg" className="rr-navbar sticky-top">
       <Container>
-        <Navbar.Brand href="#" className="d-flex align-items-center">
-          <div style={{ width: 36, height: 36, background: '#0d6efd', borderRadius: 8, marginRight: 10 }} />
-          <span className="fw-bold">RoomRadar</span>
+        <Navbar.Brand as={Link} to="/" className="rr-brand">
+          <div className="rr-brand-box">▦</div>
+          <span>RoomRadar</span>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="main-nav" />
-        <Navbar.Collapse id="main-nav">
-          <Nav className="me-auto">
-            <Nav.Link href="#">Explore</Nav.Link>
-            <Nav.Link href="#">My Go-Tos</Nav.Link>
-            <Nav.Link href="#">Bookings</Nav.Link>
-          </Nav>
 
-          <Form className="d-flex me-3" style={{ maxWidth: 520, width: '100%' }}>
-            <FormControl
-              type="search"
-              placeholder="Search libraries, cafes, or quiet buildings..."
-              className="me-2"
-              aria-label="Search"
-            />
-          </Form>
+        <Navbar.Toggle aria-controls="rr-main-nav" />
 
-          <div className="d-flex align-items-center">
-            <Button variant="outline-primary" className="me-2">Search</Button>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span role="img" aria-label="avatar">👤</span>
-            </div>
+        <Navbar.Collapse id="rr-main-nav">
+          <nav className="rr-nav-links me-auto">
+            <NavLink to="/explore" className={({ isActive }) => `rr-nav-link ${isActive ? 'active' : ''}`}>
+              Explore
+            </NavLink>
+            <NavLink to="/my-gotos" className={({ isActive }) => `rr-nav-link ${isActive ? 'active' : ''}`}>
+              My Go-Tos
+            </NavLink>
+            <NavLink to="/bookings" className={({ isActive }) => `rr-nav-link ${isActive ? 'active' : ''}`}>
+              Bookings
+            </NavLink>
+          </nav>
+
+          <div className="rr-header-actions">
+            <span className="rr-header-icon">🔔</span>
+            <span className="rr-header-avatar">JD</span>
           </div>
         </Navbar.Collapse>
       </Container>
