@@ -1,2 +1,12 @@
 /* Intentionally left minimal.
    Main styling lives in index.css for this project. */
+
+   .rr-app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rr-main {
+  flex: 1;
+}

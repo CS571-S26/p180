@@ -1,166 +1,218 @@
-import './App.css'
 import { useEffect, useMemo, useState } from 'react'
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
+import './App.css'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import { spaces } from './data/spaces'
+import LoginModal from './components/LoginModal'
+import { spaces as allSpaces } from './data/spaces'
 import { HomePage } from './pages/HomePage'
 import { ExplorePage } from './pages/ExplorePage'
 import { MyGoTosPage } from './pages/MyGoTosPage'
-import { SpaceDetailsPage } from './pages/SpaceDetailsPage'
 import { BookingsPage } from './pages/BookingsPage'
-import { useCurrentTime } from './hooks/useCurrentTime'
-import { useUserLocation } from './hooks/useUserLocation'
-import {
-  buildActivityFeed,
-  getDistanceCategory,
-  getDistanceText,
-  getHoursLabel,
-  getLiveOccupancy,
-  isSpaceOpenNow
-} from './utils/liveData'
+import { SpaceDetailsPage } from './pages/SpaceDetailsPage'
 
-const FAVORITES_KEY = 'room-radar-favorites'
-const CHECKINS_KEY = 'room-radar-checkins'
-const ACTIVITY_KEY = 'room-radar-activity'
+const FAVORITES_KEY = 'roomradar-favorites'
+const LOGIN_KEY = 'roomradar-login'
+const USER_KEY = 'roomradar-user'
+const BOOKINGS_KEY = 'roomradar-bookings'
 
-function readLocal(key, fallback) {
-  const value = localStorage.getItem(key)
-  return value ? JSON.parse(value) : fallback
+function getStoredArray(key) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(key))
+    return Array.isArray(saved) ? saved : []
+  } catch {
+    return []
+  }
 }
 
-function App() {
-  const now = useCurrentTime(60000)
-  const { userLocation, locationError, isLocating, refreshLocation } = useUserLocation()
+function getStoredUser() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(USER_KEY))
+    return saved || null
+  } catch {
+    return null
+  }
+}
 
-  const [favoriteIds, setFavoriteIds] = useState(() =>
-    readLocal(FAVORITES_KEY, ['main-library', 'engineering-hall-a'])
-  )
+export default function App() {
+  const [favoriteIds, setFavoriteIds] = useState(() => getStoredArray(FAVORITES_KEY))
+  const [checkedInIds, setCheckedInIds] = useState([])
+  const [userLocation, setUserLocation] = useState(null)
+  const [locationError, setLocationError] = useState('')
+  const [isLocating, setIsLocating] = useState(false)
 
-  const [checkedInIds, setCheckedInIds] = useState(() =>
-    readLocal(CHECKINS_KEY, [])
-  )
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem(LOGIN_KEY) === 'true')
+  const [currentUser, setCurrentUser] = useState(() => getStoredUser())
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [reservedRoomIds, setReservedRoomIds] = useState(() => getStoredArray(BOOKINGS_KEY))
 
-  const [activityEvents, setActivityEvents] = useState(() =>
-    readLocal(ACTIVITY_KEY, [])
-  )
+  const spaces = useMemo(() => allSpaces, [])
+  const now = new Date()
 
   useEffect(() => {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(favoriteIds))
   }, [favoriteIds])
 
   useEffect(() => {
-    localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkedInIds))
-  }, [checkedInIds])
+    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(reservedRoomIds))
+  }, [reservedRoomIds])
 
   useEffect(() => {
-    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activityEvents))
-  }, [activityEvents])
+    localStorage.setItem(LOGIN_KEY, isLoggedIn ? 'true' : 'false')
+  }, [isLoggedIn])
 
-  const displaySpaces = useMemo(() => {
-    return spaces.map((space) => {
-      const relatedEvents = activityEvents.filter((event) => event.spaceId === space.id)
-      const isCheckedIn = checkedInIds.includes(space.id)
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(USER_KEY, JSON.stringify(currentUser))
+    } else {
+      localStorage.removeItem(USER_KEY)
+    }
+  }, [currentUser])
 
-      return {
-        ...space,
-        occupancy: getLiveOccupancy(space.occupancy, relatedEvents, isCheckedIn, now),
-        openNow: isSpaceOpenNow(space, now),
-        hoursLabel: getHoursLabel(space, now),
-        distanceText: getDistanceText(space, userLocation),
-        distanceCategory: getDistanceCategory(space, userLocation),
-        recentActivity: buildActivityFeed(space, relatedEvents, now)
-      }
-    })
-  }, [activityEvents, checkedInIds, now, userLocation])
-
-  function toggleFavorite(id) {
+  function handleToggleFavorite(spaceId) {
     setFavoriteIds((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id]
+      current.includes(spaceId)
+        ? current.filter((id) => id !== spaceId)
+        : [...current, spaceId]
     )
   }
 
-  function toggleCheckIn(id) {
-    const isAlreadyCheckedIn = checkedInIds.includes(id)
-
+  function handleToggleCheckIn(spaceId) {
     setCheckedInIds((current) =>
-      isAlreadyCheckedIn
-        ? current.filter((item) => item !== id)
-        : [...current, id]
+      current.includes(spaceId)
+        ? current.filter((id) => id !== spaceId)
+        : [...current, spaceId]
     )
+  }
 
-    setActivityEvents((current) => [
-      {
-        spaceId: id,
-        action: isAlreadyCheckedIn ? 'checked out' : 'checked in',
-        createdAt: new Date().toISOString()
+  function handleRefreshLocation() {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported in this browser.')
+      return
+    }
+
+    setIsLocating(true)
+    setLocationError('')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+        setIsLocating(false)
       },
-      ...current
-    ].slice(0, 50))
+      () => {
+        setLocationError('Unable to access your location right now.')
+        setIsLocating(false)
+      }
+    )
+  }
+
+  function handleLogin(user) {
+    setIsLoggedIn(true)
+    setCurrentUser(user)
+    setShowLoginModal(false)
+  }
+
+  function handleLogout() {
+    setIsLoggedIn(false)
+    setCurrentUser(null)
+    setReservedRoomIds([])
+  }
+
+  function handleToggleReservation(roomId) {
+    setReservedRoomIds((current) =>
+      current.includes(roomId)
+        ? current.filter((id) => id !== roomId)
+        : [...current, roomId]
+    )
   }
 
   return (
-    <HashRouter>
-      <div className="rr-app-shell">
-        <Header />
+    <div className="rr-app-shell">
+      <Header
+        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
+        onLoginClick={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
+      />
+
+      <main className="rr-main">
         <Routes>
           <Route
             path="/"
             element={
               <HomePage
-                spaces={displaySpaces.slice(0, 4)}
+                spaces={spaces}
                 favoriteIds={favoriteIds}
-                onToggleFavorite={toggleFavorite}
+                onToggleFavorite={handleToggleFavorite}
               />
             }
           />
+
           <Route
             path="/explore"
             element={
               <ExplorePage
-                spaces={displaySpaces}
+                spaces={spaces}
                 favoriteIds={favoriteIds}
-                onToggleFavorite={toggleFavorite}
+                onToggleFavorite={handleToggleFavorite}
                 userLocation={userLocation}
                 locationError={locationError}
                 isLocating={isLocating}
-                onRefreshLocation={refreshLocation}
+                onRefreshLocation={handleRefreshLocation}
                 now={now}
               />
             }
           />
+
           <Route
             path="/my-gotos"
             element={
               <MyGoTosPage
-                spaces={displaySpaces}
+                spaces={spaces}
                 favoriteIds={favoriteIds}
-                onToggleFavorite={toggleFavorite}
+                onToggleFavorite={handleToggleFavorite}
               />
             }
           />
-          <Route path="/bookings" element={<BookingsPage />} />
+
+          <Route
+            path="/bookings"
+            element={
+              <BookingsPage
+                isLoggedIn={isLoggedIn}
+                reservedRoomIds={reservedRoomIds}
+                onToggleReservation={handleToggleReservation}
+                onRequireLogin={() => setShowLoginModal(true)}
+              />
+            }
+          />
+
           <Route
             path="/spaces/:id"
             element={
               <SpaceDetailsPage
-                spaces={displaySpaces}
+                spaces={spaces}
                 favoriteIds={favoriteIds}
                 checkedInIds={checkedInIds}
-                onToggleFavorite={toggleFavorite}
-                onToggleCheckIn={toggleCheckIn}
+                onToggleFavorite={handleToggleFavorite}
+                onToggleCheckIn={handleToggleCheckIn}
                 now={now}
               />
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <Footer />
-      </div>
-    </HashRouter>
+      </main>
+
+      <Footer />
+
+      <LoginModal
+        show={showLoginModal}
+        onHide={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+      />
+    </div>
   )
 }
-
-export default App

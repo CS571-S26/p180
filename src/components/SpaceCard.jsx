@@ -23,25 +23,22 @@ export default function SpaceCard({
     }
   }
 
+  function handleFavoriteClick(event) {
+    event.stopPropagation()
+    onToggleFavorite(space.id)
+  }
+
   return (
     <Card
       className={`rr-space-card h-100 border-0 shadow-sm ${isSelected ? 'rr-space-card-selected' : ''}`}
       onClick={handleCardClick}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: clickToOpen || onSelect ? 'pointer' : 'default' }}
     >
       <div className="rr-card-image-wrap">
         <Card.Img variant="top" src={space.image} alt={space.name} className="rr-card-image" />
-
         <div className="rr-card-top-row">
           <CrowdBadge occupancy={space.occupancy} />
-
-          <button
-            className="rr-heart-btn"
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleFavorite(space.id)
-            }}
-          >
+          <button className="rr-heart-btn" onClick={handleFavoriteClick}>
             {isFavorite ? '♥' : '♡'}
           </button>
         </div>
@@ -76,25 +73,12 @@ export default function SpaceCard({
         </div>
 
         <div className="mt-auto d-flex gap-2">
-          <Button
-            as={Link}
-            to={`/spaces/${space.id}`}
-            variant="outline-dark"
-            size="sm"
-            onClick={(event) => event.stopPropagation()}
-          >
+          <Button as={Link} to={`/spaces/${space.id}`} variant="outline-dark">
             Details
           </Button>
 
-          <Button
-            variant={isFavorite ? 'dark' : 'success'}
-            size="sm"
-            onClick={(event) => {
-              event.stopPropagation()
-              onToggleFavorite(space.id)
-            }}
-          >
-            {isFavorite ? 'Remove' : 'Save'}
+          <Button variant={isFavorite ? 'success' : 'outline-success'} onClick={handleFavoriteClick}>
+            {isFavorite ? 'Saved' : 'Save'}
           </Button>
         </div>
       </Card.Body>

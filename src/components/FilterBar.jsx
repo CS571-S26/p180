@@ -1,34 +1,42 @@
-import { Button } from 'react-bootstrap'
+import { Form } from 'react-bootstrap'
 
-const filterButtons = [
-  { key: 'quietOnly', label: 'Quiet vs Social' },
-  { key: 'outlets', label: 'Outlets' },
-  { key: 'openNow', label: 'Open Now' },
-  { key: 'groupFriendly', label: 'Group Friendly' },
-  { key: 'nearby', label: 'Distance' }
-]
-
-export default function FilterBar({ filters, onToggle, onReset }) {
-  const hasActiveFilter = Object.values(filters).some(Boolean)
-
+export default function FilterBar({
+  noiseFilter,
+  setNoiseFilter,
+  crowdingFilter,
+  setCrowdingFilter,
+  openNowOnly,
+  setOpenNowOnly,
+}) {
   return (
     <div className="rr-filterbar">
-      <Button
-        variant={hasActiveFilter ? 'dark' : 'outline-dark'}
-        onClick={onReset}
+      <Form.Select
+        value={noiseFilter}
+        onChange={(event) => setNoiseFilter(event.target.value)}
       >
-        All Filters
-      </Button>
+        <option value="all">All noise levels</option>
+        <option value="quiet">Quiet</option>
+        <option value="moderate">Moderate</option>
+        <option value="lively">Lively</option>
+      </Form.Select>
 
-      {filterButtons.map((filter) => (
-        <Button
-          key={filter.key}
-          variant={filters[filter.key] ? 'dark' : 'outline-secondary'}
-          onClick={() => onToggle(filter.key)}
-        >
-          {filter.label}
-        </Button>
-      ))}
+      <Form.Select
+        value={crowdingFilter}
+        onChange={(event) => setCrowdingFilter(event.target.value)}
+      >
+        <option value="all">All crowding</option>
+        <option value="low">Low crowding</option>
+        <option value="medium">Medium crowding</option>
+        <option value="high">High crowding</option>
+      </Form.Select>
+
+      <Form.Check
+        type="switch"
+        id="open-now-only"
+        label="Open now only"
+        checked={openNowOnly}
+        onChange={(event) => setOpenNowOnly(event.target.checked)}
+      />
     </div>
   )
 }

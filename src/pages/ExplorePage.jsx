@@ -1,158 +1,141 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button, Col, Container, Row } from 'react-bootstrap'
+import { Col, Container, Row } from 'react-bootstrap'
+import { useSearchParams } from 'react-router-dom'
 import FilterBar from '../components/FilterBar'
 import MapPanel from '../components/MapPanel'
 import SearchBar from '../components/SearchBar'
 import SpaceCard from '../components/SpaceCard'
 
-export function ExplorePage({
-  spaces,
-  favoriteIds,
-  onToggleFavorite,
-  userLocation,
-  locationError,
-  isLocating,
-  onRefreshLocation,
-  now
-}) {
-  const [query, setQuery] = useState('')
-  const [selectedSpace, setSelectedSpace] = useState(null)
-  const [filters, setFilters] = useState({
-    quietOnly: false,
-    outlets: false,
-    openNow: false,
-    groupFriendly: false,
-    nearby: false
-  })
+function getCrowdingLevel(occupancy) {
+  if (occupancy <= 40) return 'low'
+  if (occupancy <= 70) return 'medium'
+  return 'high'
+}
+
+export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const [query, setQuery] = useState(searchParams.get('q') || '')
+  const [noiseFilter, setNoiseFilter] = useState(searchParams.get('noise') || 'all')
+  const [crowdingFilter, setCrowdingFilter] = useState(
+    searchParams.get('crowding') || 'all'
+  )
+  const [openNowOnly, setOpenNowOnly] = useState(
+    searchParams.get('open') === 'true'
+  )
+
+  const [selectedSpaceId, setSelectedSpaceId] = useState(spaces[0]?.id ?? null)
+
+  useEffect(() => {
+    const nextParams = {}
+
+    if (query.trim()) nextParams.q = query.trim()
+    if (noiseFilter !== 'all') nextParams.noise = noiseFilter
+    if (crowdingFilter !== 'all') nextParams.crowding = crowdingFilter
+    if (openNowOnly) nextParams.open = 'true'
+
+    setSearchParams(nextParams, { replace: true })
+  }, [query, noiseFilter, crowdingFilter, openNowOnly, setSearchParams])
 
   const filteredSpaces = useMemo(() => {
     return spaces.filter((space) => {
-      const text = `${space.name} ${space.location} ${space.type} ${space.vibe}`.toLowerCase()
-      const matchesQuery = text.includes(query.toLowerCase())
+      const searchableText = [
+        space.name,
+        space.location,
+        space.vibe,
+        space.noise,
+        ...(space.features || []),
+      ]
+        .join(' ')
+        .toLowerCase()
 
-      const matchesQuiet = !filters.quietOnly || space.noise.toLowerCase().includes('quiet')
-      const matchesOutlets = !filters.outlets || space.outlets
-      const matchesOpenNow = !filters.openNow || space.openNow
-      const matchesGroup = !filters.groupFriendly || space.groupFriendly
-      const matchesNearby = !filters.nearby || space.distanceCategory === 'nearby'
+      const matchesQuery =
+        query.trim() === '' ||
+        searchableText.includes(query.trim().toLowerCase())
 
-      return matchesQuery && matchesQuiet && matchesOutlets && matchesOpenNow && matchesGroup && matchesNearby
+      const matchesNoise =
+        noiseFilter === 'all' ||
+        space.noise.toLowerCase().includes(noiseFilter)
+
+      const matchesCrowding =
+        crowdingFilter === 'all' ||
+        getCrowdingLevel(space.occupancy) === crowdingFilter
+
+      const matchesOpenNow = !openNowOnly || space.openNow
+
+      return matchesQuery && matchesNoise && matchesCrowding && matchesOpenNow
     })
-  }, [spaces, query, filters])
+  }, [spaces, query, noiseFilter, crowdingFilter, openNowOnly])
 
   useEffect(() => {
-    if (filteredSpaces.length === 0) {
-      setSelectedSpace(null)
-      return
+    if (!filteredSpaces.some((space) => space.id === selectedSpaceId)) {
+      setSelectedSpaceId(filteredSpaces[0]?.id ?? null)
     }
+  }, [filteredSpaces, selectedSpaceId])
 
-    const stillExists = filteredSpaces.some((space) => space.id === selectedSpace?.id)
-
-    if (!stillExists) {
-      setSelectedSpace(filteredSpaces[0])
-    }
-  }, [filteredSpaces, selectedSpace])
-
-  function toggleFilter(key) {
-    setFilters((current) => ({
-      ...current,
-      [key]: !current[key]
-    }))
-  }
-
-  function resetFilters() {
-    setFilters({
-      quietOnly: false,
-      outlets: false,
-      openNow: false,
-      groupFriendly: false,
-      nearby: false
-    })
-  }
+  const selectedSpace =
+    filteredSpaces.find((space) => space.id === selectedSpaceId) ?? filteredSpaces[0]
 
   return (
-    <main className="py-4">
-      <Container>
-        <SearchBar
-          value={query}
-          onChange={setQuery}
-          onSearch={() => {}}
-          placeholder="Search libraries, cafes, labs..."
-        />
+    <main>
+      <Container className="py-4">
+        <div className="mb-4">
+          <h1 className="rr-page-title">Explore</h1>
+          <p className="rr-muted mb-3">Results near you</p>
 
-        <div className="rr-live-strip mb-3">
-          <div>
-            <strong>Live Time:</strong>{' '}
-            {now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-          </div>
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            onSearch={() => {}}
+            placeholder="Search by space name, vibe, feature, or location..."
+          />
 
-          <div>
-            {userLocation
-              ? 'Using your current location for distance sorting.'
-              : isLocating
-              ? 'Getting your location...'
-              : 'Using default campus distances.'}
-          </div>
-
-          {!userLocation && (
-            <Button variant="outline-dark" size="sm" onClick={onRefreshLocation}>
-              Refresh Location
-            </Button>
-          )}
+          <FilterBar
+            noiseFilter={noiseFilter}
+            setNoiseFilter={setNoiseFilter}
+            crowdingFilter={crowdingFilter}
+            setCrowdingFilter={setCrowdingFilter}
+            openNowOnly={openNowOnly}
+            setOpenNowOnly={setOpenNowOnly}
+          />
         </div>
 
-        {locationError && (
-          <div className="rr-empty-state mb-3">
-            {locationError}
-          </div>
-        )}
+        <Row className="g-4 align-items-start">
+          <Col lg={8}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <div className="rr-muted">
+                Showing {filteredSpaces.length} of {spaces.length}
+              </div>
+            </div>
 
-        <FilterBar
-          filters={filters}
-          onToggle={toggleFilter}
-          onReset={resetFilters}
-        />
-
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-          <div>
-            <h1 className="rr-page-title mb-1">Explore</h1>
-            <p className="rr-muted mb-0">Results near you</p>
-          </div>
-
-          <div className="fw-semibold">
-            Showing {filteredSpaces.length} of {spaces.length}
-          </div>
-        </div>
-
-        <Row className="g-4">
-          <Col lg={7}>
             <Row className="g-4">
               {filteredSpaces.map((space) => (
                 <Col md={6} key={space.id}>
                   <SpaceCard
                     space={space}
+                    isSelected={space.id === selectedSpaceId}
+                    onSelect={(chosenSpace) => setSelectedSpaceId(chosenSpace.id)}
                     isFavorite={favoriteIds.includes(space.id)}
                     onToggleFavorite={onToggleFavorite}
-                    onSelect={setSelectedSpace}
-                    isSelected={selectedSpace?.id === space.id}
                   />
                 </Col>
               ))}
-            </Row>
 
-            {filteredSpaces.length === 0 && (
-              <div className="rr-empty-state mt-4">
-                No spaces match your filters.
-              </div>
-            )}
+              {filteredSpaces.length === 0 && (
+                <Col>
+                  <div className="rr-empty-state">
+                    <h3>No spaces found</h3>
+                    <p className="mb-0">
+                      Try changing the search text or filters.
+                    </p>
+                  </div>
+                </Col>
+              )}
+            </Row>
           </Col>
 
-          <Col lg={5}>
-            <MapPanel
-              selectedSpace={selectedSpace}
-              userLocation={userLocation}
-              onRefreshLocation={onRefreshLocation}
-            />
+          <Col lg={4}>
+            <MapPanel spaces={filteredSpaces} selectedSpace={selectedSpace} />
           </Col>
         </Row>
       </Container>

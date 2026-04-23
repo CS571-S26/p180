@@ -9,7 +9,13 @@ export function HomePage({ spaces, favoriteIds, onToggleFavorite }) {
   const navigate = useNavigate()
 
   function handleSearch() {
-    navigate('/explore')
+    const trimmedQuery = query.trim()
+
+    if (trimmedQuery) {
+      navigate(`/explore?q=${encodeURIComponent(trimmedQuery)}`)
+    } else {
+      navigate('/explore')
+    }
   }
 
   return (
