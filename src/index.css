@@ -431,3 +431,47 @@ a {
   outline: 3px solid #1d4ed8;
   outline-offset: 2px;
 }
+npm run build
+.rr-muted,
+.rr-hero-text {
+  color: #475569;
+}
+
+.rr-distance {
+  color: #334155;
+  font-weight: 600;
+}
+
+.rr-searchbar {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.rr-searchbar-input-group {
+  flex: 1;
+}
+
+.rr-filterbar .form-select {
+  min-width: 180px;
+}
+
+.rr-space-card-selected {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+.rr-heart-btn:focus-visible,
+.rr-space-card[role='button']:focus-visible,
+.rr-nav-link:focus-visible,
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 3px;
+}
+
+.rr-map-panel .text-danger {
+  color: #b91c1c !important;
+}

@@ -7,7 +7,11 @@ export default function FavoriteSpotCard({ space, onToggleFavorite }) {
     <Card className="border-0 shadow-sm rr-favorite-card">
       <Card.Body>
         <div className="rr-favorite-layout">
-          <img src={space.image} alt={space.name} className="rr-favorite-image" />
+          <img
+            src={space.image}
+            alt={`${space.name} study space`}
+            className="rr-favorite-image"
+          />
 
           <div className="rr-favorite-body">
             <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
@@ -15,7 +19,7 @@ export default function FavoriteSpotCard({ space, onToggleFavorite }) {
                 <div className="mb-2">
                   <CrowdBadge occupancy={space.occupancy} />
                 </div>
-                <h4 className="mb-1">{space.name}</h4>
+                <h2 className="h4 mb-1">{space.name}</h2>
                 <p className="rr-muted mb-2">{space.location}</p>
                 <div className="rr-feature-list">
                   {space.features.slice(0, 3).map((feature) => (
@@ -32,6 +36,7 @@ export default function FavoriteSpotCard({ space, onToggleFavorite }) {
                   variant="outline-secondary"
                   size="sm"
                   onClick={() => onToggleFavorite(space.id)}
+                  aria-label={`Remove ${space.name} from My Go-Tos`}
                 >
                   Remove
                 </Button>

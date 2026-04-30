@@ -9,26 +9,34 @@ export default function FilterBar({
   setOpenNowOnly,
 }) {
   return (
-    <div className="rr-filterbar">
-      <Form.Select
-        value={noiseFilter}
-        onChange={(event) => setNoiseFilter(event.target.value)}
-      >
-        <option value="all">All noise levels</option>
-        <option value="quiet">Quiet</option>
-        <option value="moderate">Moderate</option>
-        <option value="lively">Lively</option>
-      </Form.Select>
+    <div className="rr-filterbar" aria-label="Study space filters">
+      <Form.Group controlId="noise-filter">
+        <Form.Label className="visually-hidden">Filter by noise level</Form.Label>
+        <Form.Select
+          value={noiseFilter}
+          onChange={(event) => setNoiseFilter(event.target.value)}
+          aria-label="Filter by noise level"
+        >
+          <option value="all">All noise levels</option>
+          <option value="quiet">Quiet</option>
+          <option value="moderate">Moderate</option>
+          <option value="lively">Lively</option>
+        </Form.Select>
+      </Form.Group>
 
-      <Form.Select
-        value={crowdingFilter}
-        onChange={(event) => setCrowdingFilter(event.target.value)}
-      >
-        <option value="all">All crowding</option>
-        <option value="low">Low crowding</option>
-        <option value="medium">Medium crowding</option>
-        <option value="high">High crowding</option>
-      </Form.Select>
+      <Form.Group controlId="crowding-filter">
+        <Form.Label className="visually-hidden">Filter by crowding level</Form.Label>
+        <Form.Select
+          value={crowdingFilter}
+          onChange={(event) => setCrowdingFilter(event.target.value)}
+          aria-label="Filter by crowding level"
+        >
+          <option value="all">All crowding</option>
+          <option value="low">Low crowding</option>
+          <option value="medium">Medium crowding</option>
+          <option value="high">High crowding</option>
+        </Form.Select>
+      </Form.Group>
 
       <Form.Check
         type="switch"

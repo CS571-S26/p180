@@ -6,8 +6,12 @@ import CrowdBadge from '../components/CrowdBadge'
 const FEEDBACK_KEY = 'room-radar-feedback'
 
 function readFeedbackStore() {
-  const value = localStorage.getItem(FEEDBACK_KEY)
-  return value ? JSON.parse(value) : {}
+  try {
+    const value = localStorage.getItem(FEEDBACK_KEY)
+    return value ? JSON.parse(value) : {}
+  } catch {
+    return {}
+  }
 }
 
 export function SpaceDetailsPage({
@@ -84,10 +88,10 @@ export function SpaceDetailsPage({
       <Container className="rr-details-page">
         <img
           src={space.image}
-          alt={space.name}
+          alt={space.imageAlt || `${space.name} study space`}
           className="rr-detail-hero"
         />
-
+        
         <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
           <div>
             <h1 className="rr-page-title mb-2">{space.name}</h1>
@@ -95,7 +99,7 @@ export function SpaceDetailsPage({
               {space.location} • {space.vibe}
             </p>
             <p className="rr-muted mb-0">
-              {space.openNow ? 'Open Now' : 'Closed'} • {space.hoursLabel} • Last updated at{' '}
+              {space.openNow ? 'Open Now' : 'Closed'} • {space.hours} • Last updated at{' '}
               {now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
             </p>
           </div>
@@ -104,6 +108,7 @@ export function SpaceDetailsPage({
             <Button
               variant={isFavorite ? 'dark' : 'outline-dark'}
               onClick={() => onToggleFavorite(space.id)}
+              aria-label={isFavorite ? `Remove ${space.name} from My Go-Tos` : `Save ${space.name} to My Go-Tos`}
             >
               {isFavorite ? 'Saved' : 'Save to My Go-Tos'}
             </Button>
@@ -111,6 +116,7 @@ export function SpaceDetailsPage({
             <Button
               variant={isCheckedIn ? 'danger' : 'dark'}
               onClick={() => onToggleCheckIn(space.id)}
+              aria-label={isCheckedIn ? `Check out of ${space.name}` : `Check in to ${space.name}`}
             >
               {isCheckedIn ? 'Check Out' : 'Check In to this Space'}
             </Button>
@@ -123,7 +129,11 @@ export function SpaceDetailsPage({
               <Card.Body>
                 <div className="rr-small-label">Current Occupancy</div>
                 <div className="rr-info-number">{space.occupancy}% Full</div>
-                <ProgressBar now={space.occupancy} className="rr-progress" />
+                <ProgressBar
+                  now={space.occupancy}
+                  className="rr-progress"
+                  aria-label={`${space.occupancy}% full`}
+                />
               </Card.Body>
             </Card>
           </Col>
@@ -145,14 +155,14 @@ export function SpaceDetailsPage({
           <Col lg={6}>
             <Card className="rr-list-card h-100">
               <Card.Body>
-                <h4 className="mb-3">Amenities</h4>
+                <h2 className="h4 mb-3">Amenities</h2>
                 <ul className="rr-list">
                   {space.amenities.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
 
-                <h4 className="mt-4 mb-3">Accessibility Notes</h4>
+                <h2 className="h4 mt-4 mb-3">Accessibility Notes</h2>
                 <ul className="rr-list">
                   {space.accessibility.map((item) => (
                     <li key={item}>{item}</li>
@@ -165,12 +175,13 @@ export function SpaceDetailsPage({
           <Col lg={6}>
             <Card className="rr-list-card mb-4">
               <Card.Body>
-                <h4 className="mb-3">Was this accurate today?</h4>
+                <h2 className="h4 mb-3">Was this accurate today?</h2>
 
                 <div className="rr-feedback-grid">
                   <Button
                     variant={feedbackForSpace.userVote === 'accurate' ? 'success' : 'outline-success'}
                     onClick={() => handleVote('accurate')}
+                    aria-pressed={feedbackForSpace.userVote === 'accurate'}
                   >
                     Accurate ({feedbackForSpace.accurate})
                   </Button>
@@ -178,13 +189,14 @@ export function SpaceDetailsPage({
                   <Button
                     variant={feedbackForSpace.userVote === 'incorrect' ? 'danger' : 'outline-danger'}
                     onClick={() => handleVote('incorrect')}
+                    aria-pressed={feedbackForSpace.userVote === 'incorrect'}
                   >
                     Incorrect ({feedbackForSpace.incorrect})
                   </Button>
                 </div>
 
                 {feedbackForSpace.userVote && (
-                  <p className="rr-muted small mt-3 mb-0">
+                  <p className="rr-muted small mt-3 mb-0" aria-live="polite">
                     You marked this as <strong>{feedbackForSpace.userVote}</strong> for this space.
                   </p>
                 )}
@@ -193,7 +205,7 @@ export function SpaceDetailsPage({
 
             <Card className="rr-list-card">
               <Card.Body>
-                <h4 className="mb-3">Recent Activity</h4>
+                <h2 className="h4 mb-3">Recent Activity</h2>
                 <ul className="rr-list">
                   {space.recentActivity.map((item) => (
                     <li key={`${item.text}-${item.time}`}>

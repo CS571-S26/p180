@@ -28,23 +28,25 @@ export default function LoginModal({ show, onHide, onLogin }) {
 
       <Form onSubmit={handleSubmit}>
         <Modal.Body>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="login-name">
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
               placeholder="Enter your name"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              autoComplete="name"
             />
           </Form.Group>
 
-          <Form.Group>
+          <Form.Group controlId="login-email">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
             />
           </Form.Group>
         </Modal.Body>

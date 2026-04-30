@@ -3,30 +3,33 @@ import { Alert, Badge, Button, Card, Col, Container, Row } from 'react-bootstrap
 const bookingRooms = [
   {
     id: 'booking-room-a',
-    name: 'Collaboration Room A',
+    name: 'Memorial Library Group Room',
     building: 'Memorial Library',
     seats: 6,
     availableText: 'Available from 2:30 PM',
     image:
-      'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80'
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Memorial%20Library%2C%20University%20of%20Wisconsin%2C%20State%20Street%20and%20Campus%20Mall%2C%20Madison%2C%20WI%20-%2054302242192.jpg?width=1200',
+    imageAlt: 'Exterior view of Memorial Library on the UW-Madison campus'
   },
   {
     id: 'booking-room-b',
-    name: 'Project Room B',
+    name: 'Engineering Hall Project Room',
     building: 'Engineering Hall',
     seats: 8,
     availableText: 'Available from 4:00 PM',
     image:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80'
+      'https://commons.wikimedia.org/wiki/Special:FilePath/Engineering%20Hall%2C%20University%20of%20Wisconsin.jpg?width=1200',
+    imageAlt: 'Exterior view of Engineering Hall at UW-Madison'
   },
   {
     id: 'booking-room-c',
-    name: 'Quiet Pod 3',
+    name: 'Union South Quiet Pod',
     building: 'Union South',
     seats: 2,
     availableText: 'Available now',
     image:
-      'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80'
+      'https://commons.wikimedia.org/wiki/Special:FilePath/University%20of%20Wisconsin%E2%80%93Madison%20August%202022%2053%20%28Union%20South%29.jpg?width=1200',
+    imageAlt: 'Exterior view of Union South on the UW-Madison campus'
   }
 ]
 
@@ -54,7 +57,11 @@ export function BookingsPage({
           </Badge>
 
           {!isLoggedIn && (
-            <Button variant="outline-dark" onClick={onRequireLogin}>
+            <Button
+              variant="outline-dark"
+              onClick={onRequireLogin}
+              aria-label="Log in to reserve a study room"
+            >
               Log in to Reserve
             </Button>
           )}
@@ -76,7 +83,7 @@ export function BookingsPage({
                   <Card.Img
                     variant="top"
                     src={room.image}
-                    alt={room.name}
+                    alt={room.imageAlt || `${room.name} in ${room.building}`}
                     style={{ height: '235px', objectFit: 'cover' }}
                   />
 
@@ -100,11 +107,13 @@ export function BookingsPage({
                     <div className="mt-auto">
                       <Button
                         variant={isReserved ? 'outline-danger' : 'dark'}
+                        aria-label={isReserved ? `Cancel reservation for ${room.name}` : `Reserve ${room.name}`}
                         onClick={() => {
                           if (!isLoggedIn) {
                             onRequireLogin()
                             return
                           }
+
                           onToggleReservation(room.id)
                         }}
                       >

@@ -11,8 +11,13 @@ export default function SpaceCard({
   clickToOpen = false
 }) {
   const navigate = useNavigate()
+  const isInteractiveCard = clickToOpen || Boolean(onSelect)
 
-  function handleCardClick() {
+  function handleCardClick(event) {
+    if (event.target.closest('a, button')) {
+      return
+    }
+
     if (clickToOpen) {
       navigate(`/spaces/${space.id}`)
       return
@@ -20,6 +25,15 @@ export default function SpaceCard({
 
     if (onSelect) {
       onSelect(space)
+    }
+  }
+
+  function handleCardKeyDown(event) {
+    if (!isInteractiveCard) return
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleCardClick(event)
     }
   }
 
@@ -32,13 +46,28 @@ export default function SpaceCard({
     <Card
       className={`rr-space-card h-100 border-0 shadow-sm ${isSelected ? 'rr-space-card-selected' : ''}`}
       onClick={handleCardClick}
-      style={{ cursor: clickToOpen || onSelect ? 'pointer' : 'default' }}
+      onKeyDown={handleCardKeyDown}
+      role={isInteractiveCard ? 'button' : undefined}
+      tabIndex={isInteractiveCard ? 0 : undefined}
+      aria-label={isInteractiveCard ? `Select ${space.name}` : undefined}
+      aria-pressed={onSelect ? isSelected : undefined}
+      style={{ cursor: isInteractiveCard ? 'pointer' : 'default' }}
     >
       <div className="rr-card-image-wrap">
-        <Card.Img variant="top" src={space.image} alt={space.name} className="rr-card-image" />
+        <Card.Img
+          variant="top"
+          src={space.image}
+          alt={space.imageAlt || `${space.name} study space`}
+          className="rr-card-image"
+        />
         <div className="rr-card-top-row">
           <CrowdBadge occupancy={space.occupancy} />
-          <button className="rr-heart-btn" onClick={handleFavoriteClick}>
+          <button
+            type="button"
+            className="rr-heart-btn"
+            onClick={handleFavoriteClick}
+            aria-label={isFavorite ? `Remove ${space.name} from My Go-Tos` : `Save ${space.name} to My Go-Tos`}
+          >
             {isFavorite ? '♥' : '♡'}
           </button>
         </div>
@@ -57,7 +86,7 @@ export default function SpaceCard({
           <span className={`rr-live-pill ${space.openNow ? 'open' : 'closed'}`}>
             {space.openNow ? 'Open Now' : 'Closed'}
           </span>
-          <span className="rr-muted small">{space.hoursLabel}</span>
+          <span className="rr-muted small">{space.hours}</span>
         </div>
 
         <div className="rr-muted mb-2">
@@ -77,7 +106,11 @@ export default function SpaceCard({
             Details
           </Button>
 
-          <Button variant={isFavorite ? 'success' : 'outline-success'} onClick={handleFavoriteClick}>
+          <Button
+            variant={isFavorite ? 'success' : 'outline-success'}
+            onClick={handleFavoriteClick}
+            aria-label={isFavorite ? `Remove ${space.name} from My Go-Tos` : `Save ${space.name} to My Go-Tos`}
+          >
             {isFavorite ? 'Saved' : 'Save'}
           </Button>
         </div>

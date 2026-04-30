@@ -1,7 +1,7 @@
 export const spaces = [
   {
     id: 'main-library',
-    name: 'Main Campus Library',
+    name: 'Memorial Library',
     location: 'Central Campus • 3rd Floor East',
     distanceText: '0.2 mi',
     distanceCategory: 'nearby',
@@ -14,7 +14,8 @@ export const spaces = [
     groupFriendly: false,
     features: ['Wi-Fi', 'Power outlets', 'Quiet desks'],
     hours: 'Open until 11:00 PM',
-    image: 'https://picsum.photos/seed/mainlibrary/900/600',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Memorial%20Library%2C%20University%20of%20Wisconsin%2C%20State%20Street%20and%20Campus%20Mall%2C%20Madison%2C%20WI%20-%2054302242192.jpg?width=1200',
+    imageAlt: 'Exterior view of Memorial Library on the UW-Madison campus',
     coordinates: { lat: 43.0766, lng: -89.4003 },
     hoursByDay: {
       0: { open: '10:00', close: '18:00' },
@@ -44,8 +45,8 @@ export const spaces = [
   },
   {
     id: 'bean-post',
-    name: 'The Bean Post',
-    location: 'Student Union • Ground Floor',
+    name: 'College Library Open Book Café',
+    location: 'Helen C. White Hall • Café Study Area',
     distanceText: '0.5 mi',
     distanceCategory: 'mid',
     occupancy: 58,
@@ -57,7 +58,8 @@ export const spaces = [
     groupFriendly: true,
     features: ['Coffee nearby', 'Power outlets', 'Casual seating'],
     hours: 'Open until 9:00 PM',
-    image: 'https://picsum.photos/seed/beanpost/900/600',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/College%20Library%20cafe07%206014%20%2814046968402%29.jpg?width=1200',
+    imageAlt: 'Students studying inside College Library Open Book Cafe at UW-Madison',
     coordinates: { lat: 43.0725, lng: -89.4072 },
     hoursByDay: {
       0: { open: '11:00', close: '17:00' },
@@ -100,7 +102,8 @@ export const spaces = [
     groupFriendly: true,
     features: ['Group seating', 'Wi-Fi', 'Open tables'],
     hours: 'Open until 12:00 AM',
-    image: 'https://picsum.photos/seed/unionsouth/900/600',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/University%20of%20Wisconsin%E2%80%93Madison%20August%202022%2053%20%28Union%20South%29.jpg?width=1200',
+    imageAlt: 'Exterior view of Union South on the UW-Madison campus',
     coordinates: { lat: 43.0716, lng: -89.4078 },
     hoursByDay: {
       0: { open: '09:00', close: '22:00' },
@@ -130,7 +133,7 @@ export const spaces = [
   },
   {
     id: 'engineering-hall-a',
-    name: 'Engineering Hall A',
+    name: 'Engineering Hall',
     location: 'Engineering Campus • Room A120',
     distanceText: '0.8 mi',
     distanceCategory: 'far',
@@ -143,7 +146,8 @@ export const spaces = [
     groupFriendly: false,
     features: ['Quiet room', 'Power outlets', 'Individual desks'],
     hours: 'Open until 10:00 PM',
-    image: 'https://picsum.photos/seed/engineeringhall/900/600',
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Engineering%20Hall%2C%20University%20of%20Wisconsin.jpg?width=1200',
+    imageAlt: 'Exterior view of Engineering Hall at UW-Madison',
     coordinates: { lat: 43.0734, lng: -89.4115 },
     hoursByDay: {
       0: null,
@@ -173,8 +177,8 @@ export const spaces = [
   },
   {
     id: 'graduate-commons',
-    name: 'Graduate Commons',
-    location: 'North Campus • Level 4',
+    name: 'Steenbock Library Commons',
+    location: 'North Campus • Study Commons',
     distanceText: '0.4 mi',
     distanceCategory: 'mid',
     occupancy: 47,
@@ -186,8 +190,9 @@ export const spaces = [
     groupFriendly: true,
     features: ['Wi-Fi', 'Power outlets', 'Soft seating'],
     hours: 'Reopens at 8:00 AM',
-    image: 'https://picsum.photos/seed/graduatecommons/900/600',
-    coordinates: { lat: 43.0787, lng: -89.3989 },
+    image: 'https://commons.wikimedia.org/wiki/Special:FilePath/Allen%20Centennial%20Garden%20and%20Steenbock%20Library.jpg?width=1200',
+    imageAlt: 'View of Steenbock Library near Allen Centennial Garden at UW-Madison',
+     coordinates: { lat: 43.0787, lng: -89.3989 },
     hoursByDay: {
       0: null,
       1: { open: '08:00', close: '20:00' },

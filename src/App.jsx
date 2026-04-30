@@ -97,8 +97,8 @@ export default function App() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUserLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
         })
         setIsLocating(false)
       },

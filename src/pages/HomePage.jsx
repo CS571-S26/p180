@@ -36,6 +36,8 @@ export function HomePage({ spaces, favoriteIds, onToggleFavorite }) {
             onChange={setQuery}
             onSearch={handleSearch}
             placeholder="Search libraries, cafes, or quiet buildings..."
+            label="Search libraries, cafes, or quiet buildings"
+            controlId="home-search"
           />
 
           <div className="d-flex flex-wrap gap-2 mt-3">

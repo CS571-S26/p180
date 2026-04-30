@@ -12,7 +12,15 @@ function getCrowdingLevel(occupancy) {
   return 'high'
 }
 
-export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
+export function ExplorePage({
+  spaces,
+  favoriteIds,
+  onToggleFavorite,
+  userLocation,
+  locationError,
+  isLocating,
+  onRefreshLocation
+}) {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const [query, setQuery] = useState(searchParams.get('q') || '')
@@ -67,14 +75,8 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
     })
   }, [spaces, query, noiseFilter, crowdingFilter, openNowOnly])
 
-  useEffect(() => {
-    if (!filteredSpaces.some((space) => space.id === selectedSpaceId)) {
-      setSelectedSpaceId(filteredSpaces[0]?.id ?? null)
-    }
-  }, [filteredSpaces, selectedSpaceId])
-
   const selectedSpace =
-    filteredSpaces.find((space) => space.id === selectedSpaceId) ?? filteredSpaces[0]
+    filteredSpaces.find((space) => space.id === selectedSpaceId) ?? filteredSpaces[0] ?? null
 
   return (
     <main>
@@ -88,6 +90,8 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
             onChange={setQuery}
             onSearch={() => {}}
             placeholder="Search by space name, vibe, feature, or location..."
+            label="Search study spaces by name, vibe, feature, or location"
+            controlId="explore-search"
           />
 
           <FilterBar
@@ -103,7 +107,7 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
         <Row className="g-4 align-items-start">
           <Col lg={8}>
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <div className="rr-muted">
+              <div className="rr-muted" aria-live="polite">
                 Showing {filteredSpaces.length} of {spaces.length}
               </div>
             </div>
@@ -113,7 +117,7 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
                 <Col md={6} key={space.id}>
                   <SpaceCard
                     space={space}
-                    isSelected={space.id === selectedSpaceId}
+                    isSelected={space.id === selectedSpace?.id}
                     onSelect={(chosenSpace) => setSelectedSpaceId(chosenSpace.id)}
                     isFavorite={favoriteIds.includes(space.id)}
                     onToggleFavorite={onToggleFavorite}
@@ -124,7 +128,7 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
               {filteredSpaces.length === 0 && (
                 <Col>
                   <div className="rr-empty-state">
-                    <h3>No spaces found</h3>
+                    <h2 className="h4">No spaces found</h2>
                     <p className="mb-0">
                       Try changing the search text or filters.
                     </p>
@@ -135,7 +139,13 @@ export function ExplorePage({ spaces, favoriteIds, onToggleFavorite }) {
           </Col>
 
           <Col lg={4}>
-            <MapPanel spaces={filteredSpaces} selectedSpace={selectedSpace} />
+            <MapPanel
+              selectedSpace={selectedSpace}
+              userLocation={userLocation}
+              locationError={locationError}
+              isLocating={isLocating}
+              onRefreshLocation={onRefreshLocation}
+            />
           </Col>
         </Row>
       </Container>
